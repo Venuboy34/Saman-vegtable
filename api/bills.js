@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
     const db = client.db('samanShop');
     const bills = db.collection('bills');
 
-    // GET: Fetch bills (optional date filter)
+    // GET: Fetch bills
     if (req.method === 'GET') {
       const { date, limit } = req.query;
       
@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
 
     // POST: Create new bill
     if (req.method === 'POST') {
-      const { items, total } = req.body;
+      const { items, total, amountPaid, balance } = req.body;
 
       if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ error: 'Items required' });
@@ -58,6 +58,8 @@ module.exports = async (req, res) => {
         billNumber,
         items,
         total: parseFloat(total),
+        amountPaid: parseFloat(amountPaid) || 0,
+        balance: parseFloat(balance) || 0,
         createdAt: new Date()
       });
 
