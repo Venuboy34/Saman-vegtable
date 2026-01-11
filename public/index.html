@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saman Vegetable Shop</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .header h1 { font-size: 24px; margin-bottom: 5px; }
+        .header p { font-size: 12px; opacity: 0.9; }
+
+        .bill-number {
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+            font-size: 14px;
+        }
+
+        .tab.active {
+            color: #2ecc71;
+            background: white;
+            border-bottom: 3px solid #2ecc71;
+        }
+
+        .tab-content { display: none; padding: 20px; }
+        .tab-content.active { display: block; }
+
+        .vegetable-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .veg-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #dee2e6;
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .veg-card:active { transform: scale(0.95); }
+
+        .veg-card.selected {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border-color: #27ae60;
+        }
+
+        .veg-card .name { font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+        .veg-card .price { font-size: 14px; opacity: 0.8; }
+        .veg-card .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-top: 5px;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .quantity-input {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .quantity-input.show { display: block; }
+        .quantity-input h3 { margin-bottom: 15px; color: #2c3e50; }
+
+        .weight-buttons, .piece-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .weight-btn, .piece-btn {
+            background: white;
+            border: 2px solid #2ecc71;
+            color: #2ecc71;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .weight-btn:active, .piece-btn:active {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .custom-weight {
+            display: flex;
+            gap: 10px;
+        }
+
+        .custom-weight input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-secondary { background: #6c757d; color: white; }
+
+        .cart { max-height: 300px; overflow-y: auto; }
+
+        .cart-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-weight: 600; font-size: 16px; color: #2c3e50; }
+        .cart-item-details { font-size: 14px; color: #6c757d; margin-top: 5px; }
+        .cart-item-price { font-size: 18px; font-weight: 700; color: #2ecc71; }
+
+        .cart-item-remove {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 18px;
+        }
+
+        .cart-total {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .empty-cart { text-align: center; padding: 40px 20px; color: #6c757d; }
+        .empty-cart-icon { font-size: 60px; margin-bottom: 15px; }
+
+        .inventory-form {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .inventory-list { max-height: 400px; overflow-y: auto; }
+
+        .inventory-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .inventory-actions button {
+            margin-left: 5px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-edit { background: #3498db; color: white; }
+        .btn-delete { background: #e74c3c; color: white; }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .bill-preview {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .bill-preview, .bill-preview * { visibility: visible; }
+            .bill-preview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🥬 SAMAN VEGETABLE</h1>
+            <p>(Seed Potato)</p>
+            <p>No.01, St. Andrew's Road, Nuwara Eliya</p>
+            <p>📞 077 549 1366 / 071 6268 313</p>
+            <div class="bill-number">Bill #<span id="billNumber">-</span></div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('billing')">🛒 Billing</button>
+            <button class="tab" onclick="showTab('cart')">📋 Cart (<span id="cartCount">0</span>)</button>
+            <button class="tab" onclick="showTab('inventory')">⚙️ Inventory</button>
+            <button class="tab" onclick="showTab('sales')">📊 Sales</button>
+        </div>
+
+        <!-- Billing Tab -->
+        <div id="billing" class="tab-content active">
+            <div class="vegetable-grid" id="vegetableGrid">
+                <div class="loading">Loading products...</div>
+            </div>
+            
+            <div class="quantity-input" id="quantityInput">
+                <h3><span id="selectedVegName"></span> - <span id="selectedVegType"></span></h3>
+                
+                <div id="weightInputs" style="display:none;">
+                    <div class="weight-buttons">
+                        <button class="weight-btn" onclick="selectWeight(0.25)">250g</button>
+                        <button class="weight-btn" onclick="selectWeight(0.5)">500g</button>
+                        <button class="weight-btn" onclick="selectWeight(0.75)">750g</button>
+                        <button class="weight-btn" onclick="selectWeight(1)">1kg</button>
+                        <button class="weight-btn" onclick="selectWeight(1.5)">1.5kg</button>
+                        <button class="weight-btn" onclick="selectWeight(2)">2kg</button>
+                        <button class="weight-btn" onclick="selectWeight(2.5)">2.5kg</button>
+                        <button class="weight-btn" onclick="selectWeight(3)">3kg</button>
+                    </div>
+                    <div class="custom-weight">
+                        <input type="number" id="customWeight" placeholder="Custom weight (kg)" step="0.1">
+                        <button class="btn btn-primary" onclick="addCustomWeight()">Add</button>
+                    </div>
+                </div>
+
+                <div id="pieceInputs" style="display:none;">
+                    <div class="piece-buttons">
+                        <button class="piece-btn" onclick="selectPiece(1)">1 pc</button>
+                        <button class="piece-btn" onclick="selectPiece(2)">2 pcs</button>
+                        <button class="piece-btn" onclick="selectPiece(3)">3 pcs</button>
+                        <button class="piece-btn" onclick="selectPiece(4)">4 pcs</button>
+                        <button class="piece-btn" onclick="selectPiece(5)">5 pcs</button>
+                        <button class="piece-btn" onclick="selectPiece(10)">10 pcs</button>
+                        <button class="piece-btn" onclick="selectPiece(20)">20 pcs</button>
+                        <button class="piece-btn" onclick="selectPiece(50)">50 pcs</button>
+                    </div>
+                    <div class="custom-weight">
+                        <input type="number" id="customPiece" placeholder="Custom quantity" step="1" min="1">
+                        <button class="btn btn-primary" onclick="addCustomPiece()">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Tab -->
+        <div id="cart" class="tab-content">
+            <div class="cart" id="cartItems"></div>
+            <div class="cart-total" id="cartTotal">Total: Rs 0.00</div>
+            <button class="btn btn-primary" onclick="generateBill()">Generate Bill 🧾</button>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div id="inventory" class="tab-content">
+            <div class="inventory-form">
+                <h3>Add New Product</h3>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="newProductName" placeholder="e.g., Carrot">
+                </div>
+                <div class="form-group">
+                    <label>Selling Type</label>
+                    <select id="newProductType">
+                        <option value="weight">By Weight (per KG)</option>
+                        <option value="piece">By Piece</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="priceLabel">Price per KG (Rs)</label>
+                    <input type="number" id="newProductPrice" placeholder="e.g., 200" step="0.01">
+                </div>
+                <button class="btn btn-primary" onclick="addProduct()">Add Product</button>
+            </div>
+
+            <div class="inventory-list" id="inventoryList">
+                <div class="loading">Loading inventory...</div>
+            </div>
+        </div>
+
+        <!-- Sales Tab -->
+        <div id="sales" class="tab-content">
+            <div class="inventory-form">
+                <h2 style="margin-bottom: 20px;">📊 Today's Sales</h2>
+                <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="font-size: 18px; color: #6c757d; margin-bottom: 10px;">Total Bills</div>
+                    <div style="font-size: 36px; font-weight: 700; color: #2ecc71;" id="salesBillCount">0</div>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 18px; color: #6c757d; margin-bottom: 10px;">Total Sales</div>
+                    <div style="font-size: 36px; font-weight: 700; color: #2ecc71;" id="salesTotalAmount">Rs 0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL (change this after deployment)
+        const API_URL = window.location.origin;
+
+        let products = [];
+        let cart = [];
+        let selectedProduct = null;
+
+        // Update price label when type changes
+        document.getElementById('newProductType').addEventListener('change', function() {
+            const label = document.getElementById('priceLabel');
+            label.textContent = this.value === 'weight' ? 'Price per KG (Rs)' : 'Price per Piece (Rs)';
+        });
+
+        // Load all data on startup
+        async function loadData() {
+            await loadProducts();
+            await loadBillNumber();
+            await loadSales();
+        }
+
+        // Load products from API
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/api/products`);
+                if (response.ok) {
+                    products = await response.json();
+                    renderProducts();
+                    renderInventory();
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showNotification('⚠️ Error loading products');
+            }
+        }
+
+        // Load bill number
+        async function loadBillNumber() {
+            try {
+                const response = await fetch(`${API_URL}/api/bills?limit=1`);
+                if (response.ok) {
+                    const bills = await response.json();
+                    const billNumber = bills.length > 0 ? bills[0].billNumber + 1 : 1;
+                    document.getElementById('billNumber').textContent = billNumber;
+                }
+            } catch (error) {
+                console.error('Error loading bill number:', error);
+                document.getElementById('billNumber').textContent = '1';
+            }
+        }
+
+        // Load sales data
+        async function loadSales() {
+            try {
+                const response = await fetch(`${API_URL}/api/sales`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('salesBillCount').textContent = data.billCount;
+                    document.getElementById('salesTotalAmount').textContent = `Rs ${data.totalSales.toFixed(2)}`;
+                }
+            } catch (error) {
+                console.error('Error loading sales:', error);
+            }
+        }
+
+        // Show tab
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'cart') renderCart();
+            if (tabName === 'inventory') renderInventory();
+            if (tabName === 'sales') loadSales();
+        }
+
+        // Render products
+        function renderProducts() {
+            const grid = document.getElementById('vegetableGrid');
+            
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="loading">No products yet. Add some in Inventory tab!</div>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'veg-card';
+                const priceText = product.type === 'weight' 
+                    ? `Rs ${product.price.toFixed(2)}/kg` 
+                    : `Rs ${product.price.toFixed(2)}/pc`;
+                const badgeText = product.type === 'weight' ? '⚖️ Weight' : '🔢 Piece';
+                
+                card.innerHTML = `
+                    <div class="name">${product.name}</div>
+                    <div class="price">${priceText}</div>
+                    <div class="badge">${badgeText}</div>
+                `;
+                card.onclick = () => selectProduct(product);
+                grid.appendChild(card);
+            });
+        }
+
+        // Select product
+        function selectProduct(product) {
+            selectedProduct = product;
+            document.getElementById('selectedVegName').textContent = product.name;
+            document.getElementById('selectedVegType').textContent = 
+                product.type === 'weight' ? 'Select Weight' : 'Select Quantity';
+            
+            // Show appropriate inputs
+            document.getElementById('weightInputs').style.display = product.type === 'weight' ? 'block' : 'none';
+            document.getElementById('pieceInputs').style.display = product.type === 'piece' ? 'block' : 'none';
+            document.getElementById('quantityInput').classList.add('show');
+            document.getElementById('customWeight').value = '';
+            document.getElementById('customPiece').value = '';
+        }
+
+        // Select weight
+        function selectWeight(weight) {
+            if (!selectedProduct || selectedProduct.type !== 'weight') return;
+            
+            const total = selectedProduct.price * weight;
+            cart.push({
+                name: selectedProduct.name,
+                type: 'weight',
+                quantity: weight,
+                unit: 'kg',
+                pricePerUnit: selectedProduct.price,
+                total: total
+            });
+            
+            updateCartCount();
+            document.getElementById('quantityInput').classList.remove('show');
+            selectedProduct = null;
+            showNotification(`✅ Added ${weight}kg to cart!`);
+        }
+
+        // Add custom weight
+        function addCustomWeight() {
+            const weight = parseFloat(document.getElementById('customWeight').value);
+            if (!weight || weight <= 0) {
+                alert('Please enter a valid weight!');
+                return;
+            }
+            selectWeight(weight);
+        }
+
+        // Select piece
+        function selectPiece(quantity) {
+            if (!selectedProduct || selectedProduct.type !== 'piece') return;
+            
+            const total = selectedProduct.price * quantity;
+            cart.push({
+                name: selectedProduct.name,
+                type: 'piece',
+                quantity: quantity,
+                unit: quantity === 1 ? 'pc' : 'pcs',
+                pricePerUnit: selectedProduct.price,
+                total: total
+            });
+            
+            updateCartCount();
+            document.getElementById('quantityInput').classList.remove('show');
+            selectedProduct = null;
+            showNotification(`✅ Added ${quantity} piece(s) to cart!`);
+        }
+
+        // Add custom piece
+        function addCustomPiece() {
+            const quantity = parseInt(document.getElementById('customPiece').value);
+            if (!quantity || quantity <= 0) {
+                alert('Please enter a valid quantity!');
+                return;
+            }
+            selectPiece(quantity);
+        }
+
+        // Update cart count
+        function updateCartCount() {
+            document.getElementById('cartCount').textContent = cart.length;
+        }
+
+        // Render cart
+        function renderCart() {
+            const cartDiv = document.getElementById('cartItems');
+            
+            if (cart.length === 0) {
+                cartDiv.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <p>Your cart is empty</p>
+                        <p style="font-size: 14px; margin-top: 10px;">Add items from the Billing tab</p>
+                    </div>
+                `;
+                document.getElementById('cartTotal').textContent = 'Total: Rs 0.00';
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                let qtyStr = '';
+                if (item.type === 'weight') {
+                    qtyStr = item.quantity >= 1 ? `${item.quantity}kg` : `${item.quantity * 1000}g`;
+                } else {
+                    qtyStr = `${item.quantity} ${item.unit}`;
+                }
+                
+                const unitLabel = item.type === 'weight' ? '/kg' : '/pc';
+                
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-details">${qtyStr} × Rs ${item.pricePerUnit.toFixed(2)}${unitLabel}</div>
+                        </div>
+                        <div class="cart-item-price">Rs ${item.total.toFixed(2)}</div>
+                        <button class="cart-item-remove" onclick="removeItem(${index})">×</button>
+                    </div>
+                `;
+                total += item.total;
+            });
+            
+            cartDiv.innerHTML = html;
+            document.getElementById('cartTotal').textContent = `Total: Rs ${total.toFixed(2)}`;
+        }
+
+        // Remove item from cart
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCartCount();
+            renderCart();
+        }
+
+        // Generate bill
+        async function generateBill() {
+            if (cart.length === 0) {
+                alert('Cart is empty!');
+                return;
+            }
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB');
+            const timeStr = now.toLocaleTimeString('en-GB');
+            
+            let total = 0;
+            cart.forEach(item => total += item.total);
+            
+            // Save to database
+            try {
+                const response = await fetch(`${API_URL}/api/bills`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: cart, total })
+                });
+                
+                if (!response.ok) throw new Error('Failed to save bill');
+                
+                const result = await response.json();
+                const billNumber = result.billNumber;
+                
+                // Generate bill text
+                let bill = '==========================================\n';
+                bill += '        SAMAN VEGETABLE\n';
+                bill += '         (Seed Potato)\n';
+                bill += '  No.01, St. Andrew\'s Road, Nuwara Eliya\n';
+                bill += '    Tel: 077 549 1366 / 071 6268 313\n';
+                bill += '==========================================\n';
+                bill += `Bill: ${billNumber}          Date: ${dateStr}\n`;
+                bill += `Time: ${timeStr}\n`;
+                bill += '------------------------------------------\n';
+                bill += 'Item         Qty      Rate      Amount\n';
+                bill += '------------------------------------------\n';
+                
+                cart.forEach(item => {
+                    let qtyStr = '';
+                    if (item.type === 'weight') {
+                        qtyStr = item.quantity >= 1 ? `${item.quantity.toFixed(2)}kg` : `${(item.quantity * 1000).toFixed(0)}g`;
+                    } else {
+                        qtyStr = `${item.quantity} ${item.unit}`;
+                    }
+                    
+                    const itemLine = `${item.name.padEnd(12)} ${qtyStr.padEnd(8)} ${item.pricePerUnit.toFixed(2).padEnd(9)} ${item.total.toFixed(2)}`;
+                    bill += itemLine + '\n';
+                });
+                
+                bill += '------------------------------------------\n';
+                bill += `${'TOTAL:'.padEnd(32)} Rs ${total.toFixed(2)}\n`;
+                bill += '==========================================\n\n';
+                bill += '     Thank you for your business!\n';
+                bill += '          Visit Again!\n';
+                bill += '==========================================\n';
+                
+                showBillModal(bill, total, billNumber);
+                
+            } catch (error) {
+                console.error('Error saving bill:', error);
+                alert('Error saving bill. Please try again.');
+            }
+        }
+
+        // Show bill modal
+        function showBillModal(billText, total, billNumber) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 20px; padding: 30px; max-width: 500px; width: 100%;">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">Bill #${billNumber} Generated! 🎉</h2>
+                    <div class="bill-preview" id="billPreview">${billText}</div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="printBill()">🖨️ Print</button>
+                        <button class="btn btn-secondary" onclick="shareBill()">📤 Share</button>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 10px;" onclick="finishBill()">✅ Finish & New Bill</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.onclick = (e) => {
+                if (e.target === modal) document.body.removeChild(modal);
+            };
+        }
+
+        // Print bill
+        function printBill() {
+            window.print();
+        }
+
+        // Share bill
+        function shareBill() {
+            const billText = document.getElementById('billPreview').textContent;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Bill from Saman Vegetable',
+                    text: billText
+                }).catch(err => console.log('Share failed:', err));
+            } else {
+                navigator.clipboard.writeText(billText).then(() => {
+                    alert('Bill copied to clipboard!');
+                });
+            }
+        }
+
+        // Finish bill
+        function finishBill() {
+            cart = [];
+            updateCartCount();
+            loadBillNumber();
+            loadSales();
+            
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) document.body.removeChild(modal);
+            
+            showTab('billing');
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            showNotification('✅ Ready for next customer!');
+        }
+
+        // Add product to inventory
+        async function addProduct() {
+            const name = document.getElementById('newProductName').value.trim();
+            const price = parseFloat(document.getElementById('newProductPrice').value);
+            const type = document.getElementById('newProductType').value;
+            
+            if (!name || !price || price <= 0) {
+                alert('Please enter valid name and price!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, price, type })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to add product');
+                }
+                
+                document.getElementById('newProductName').value = '';
+                document.getElementById('newProductPrice').value = '';
+                document.getElementById('newProductType').value = 'weight';
+                document.getElementById('priceLabel').textContent = 'Price per KG (Rs)';
+                
+                await loadProducts();
+                showNotification('✅ Product added!');
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Render inventory
+        function renderInventory() {
+            const list = document.getElementById('inventoryList');
+            
+            if (products.length === 0) {
+                list.innerHTML = '<div class="loading">No products yet. Add some above!</div>';
+                return;
+            }
+            
+            let html = '';
+            
+            products.forEach(product => {
+                const priceLabel = product.type === 'weight' ? '/kg' : '/pc';
+                const typeLabel = product.type === 'weight' ? '⚖️ Weight' : '🔢 Piece';
+                
+                html += `
+                    <div class="inventory-item">
+                        <div>
+                            <div style="font-weight: 600; font-size: 16px;">${product.name}</div>
+                            <div style="color: #6c757d; font-size: 14px;">Rs ${product.price.toFixed(2)}${priceLabel} · ${typeLabel}</div>
+                        </div>
+                        <div class="inventory-actions">
+                            <button class="btn-edit" onclick='editProduct(${JSON.stringify(product)})'>Edit</button>
+                            <button class="btn-delete" onclick="deleteProduct('${product._id}', '${product.name}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+
+        // Edit product
+        async function editProduct(product) {
+            const newName = prompt('Product name:', product.name);
+            if (!newName) return;
+            
+            const newType = confirm('Is this sold by weight? (OK = Weight, Cancel = Piece)') ? 'weight' : 'piece';
+            const priceLabel = newType === 'weight' ? 'per KG' : 'per Piece';
+            const newPrice = prompt(`Price ${priceLabel} (Rs):`, product.price);
+            if (!newPrice || parseFloat(newPrice) <= 0) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: product._id,
+                        name: newName,
+                        price: parseFloat(newPrice),
+                        type: newType
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to update');
+                
+                await loadProducts();
+                showNotification('✅ Product updated!');
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Delete product
+        async function deleteProduct(id, name) {
+            if (!confirm(`Delete ${name}?`)) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products?id=${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Failed to delete');
+                
+                await loadProducts();
+                showNotification('✅ Product deleted!');
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #2ecc71;
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                font-weight: 600;
+                z-index: 2000;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 2000);
+        }
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>            
