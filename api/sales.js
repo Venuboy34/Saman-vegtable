@@ -1,3 +1,6 @@
+// ============================================
+// FILE: api/sales.js
+// ============================================
 const clientPromise = require('../lib/mongodb');
 
 module.exports = async (req, res) => {
