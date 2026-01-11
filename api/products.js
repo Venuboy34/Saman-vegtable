@@ -2,7 +2,6 @@ const clientPromise = require('../lib/mongodb');
 const { ObjectId } = require('mongodb');
 
 module.exports = async (req, res) => {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -24,18 +23,17 @@ module.exports = async (req, res) => {
 
     // POST: Add new product
     if (req.method === 'POST') {
-      const { name, price, type } = req.body;
+      const { name, price, type, imageUrl } = req.body;
       
       if (!name || !price || !type) {
-        return res.status(400).json({ error: 'Name, price, and type are required' });
+        return res.status(400).json({ error: 'Name, price, and type required' });
       }
 
       if (!['weight', 'piece'].includes(type)) {
         return res.status(400).json({ error: 'Type must be "weight" or "piece"' });
       }
 
-      // Check if product already exists
-      const existing = await products.findOne({ name });
+      const existing = await products.findOne({ name: name.trim() });
       if (existing) {
         return res.status(400).json({ error: 'Product already exists' });
       }
@@ -44,6 +42,7 @@ module.exports = async (req, res) => {
         name: name.trim(),
         price: parseFloat(price),
         type,
+        imageUrl: imageUrl || null,
         createdAt: new Date()
       });
 
@@ -53,53 +52,32 @@ module.exports = async (req, res) => {
       });
     }
 
-    // PUT: Update product (flexible - can update any field)
+    // PUT: Update product
     if (req.method === 'PUT') {
-      const { id, name, price, type } = req.body;
+      const { id, name, price, type, imageUrl } = req.body;
       
-      if (!id) {
-        return res.status(400).json({ error: 'Product ID is required' });
+      if (!id || !name || !price || !type) {
+        return res.status(400).json({ error: 'Missing required fields' });
       }
-
-      // Build update object dynamically based on what fields are provided
-      const updateFields = {};
-      
-      if (name !== undefined && name !== null && name.trim() !== '') {
-        updateFields.name = name.trim();
-      }
-      
-      if (price !== undefined && price !== null) {
-        updateFields.price = parseFloat(price);
-      }
-      
-      if (type !== undefined && type !== null) {
-        if (!['weight', 'piece'].includes(type)) {
-          return res.status(400).json({ error: 'Type must be "weight" or "piece"' });
-        }
-        updateFields.type = type;
-      }
-
-      // Check if there's anything to update
-      if (Object.keys(updateFields).length === 0) {
-        return res.status(400).json({ error: 'No fields to update' });
-      }
-
-      // Add updatedAt timestamp
-      updateFields.updatedAt = new Date();
 
       const result = await products.updateOne(
         { _id: new ObjectId(id) },
-        { $set: updateFields }
+        { 
+          $set: { 
+            name: name.trim(),
+            price: parseFloat(price),
+            type,
+            imageUrl: imageUrl || null,
+            updatedAt: new Date()
+          } 
+        }
       );
 
       if (result.matchedCount === 0) {
         return res.status(404).json({ error: 'Product not found' });
       }
 
-      return res.status(200).json({ 
-        success: true,
-        updated: updateFields 
-      });
+      return res.status(200).json({ success: true });
     }
 
     // DELETE: Remove product
