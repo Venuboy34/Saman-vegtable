@@ -20,11 +20,13 @@ module.exports = async (req, res) => {
 
     const { date } = req.query;
 
+    // Default to today
     const targetDate = date ? new Date(date) : new Date();
     targetDate.setHours(0, 0, 0, 0);
     const nextDay = new Date(targetDate);
     nextDay.setDate(nextDay.getDate() + 1);
 
+    // Aggregate sales data
     const salesData = await bills.aggregate([
       {
         $match: {
@@ -52,3 +54,4 @@ module.exports = async (req, res) => {
     console.error('Sales API Error:', error);
     return res.status(500).json({ error: error.message });
   }
+};
