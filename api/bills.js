@@ -1,3 +1,7 @@
+// ============================================
+// FILE: api/bills.js
+// NOW WITH PAYMENT AND BALANCE TRACKING
+// ============================================
 const clientPromise = require('../lib/mongodb');
 
 module.exports = async (req, res) => {
@@ -14,7 +18,7 @@ module.exports = async (req, res) => {
     const db = client.db('samanShop');
     const bills = db.collection('bills');
 
-    // GET: Fetch bills
+    // GET: Fetch bills (optional date filter)
     if (req.method === 'GET') {
       const { date, limit } = req.query;
       
@@ -38,7 +42,7 @@ module.exports = async (req, res) => {
       return res.status(200).json(allBills);
     }
 
-    // POST: Create new bill
+    // POST: Create new bill (with payment info)
     if (req.method === 'POST') {
       const { items, total, amountPaid, balance } = req.body;
 
@@ -58,8 +62,8 @@ module.exports = async (req, res) => {
         billNumber,
         items,
         total: parseFloat(total),
-        amountPaid: parseFloat(amountPaid) || 0,
-        balance: parseFloat(balance) || 0,
+        amountPaid: parseFloat(amountPaid) || 0, // NEW: Amount customer paid
+        balance: parseFloat(balance) || 0, // NEW: Change to return
         createdAt: new Date()
       });
 
