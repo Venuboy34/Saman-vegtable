@@ -1,7 +1,7 @@
 {
   "name": "saman-vegetable-shop",
-  "version": "1.0.0",
-  "description": "Fast billing system with MongoDB",
+  "version": "2.0.0",
+  "description": "Full-stack vegetable shop billing system",
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel --prod"
