@@ -1,3 +1,7 @@
+// ============================================
+// FILE: api/products.js
+// NOW WITH IMAGE URL SUPPORT
+// ============================================
 const clientPromise = require('../lib/mongodb');
 const { ObjectId } = require('mongodb');
 
@@ -21,19 +25,19 @@ module.exports = async (req, res) => {
       return res.status(200).json(allProducts);
     }
 
-    // POST: Add new product
+    // POST: Add new product (with image URL)
     if (req.method === 'POST') {
       const { name, price, type, imageUrl } = req.body;
       
       if (!name || !price || !type) {
-        return res.status(400).json({ error: 'Name, price, and type required' });
+        return res.status(400).json({ error: 'Name, price, and type are required' });
       }
 
       if (!['weight', 'piece'].includes(type)) {
         return res.status(400).json({ error: 'Type must be "weight" or "piece"' });
       }
 
-      const existing = await products.findOne({ name: name.trim() });
+      const existing = await products.findOne({ name });
       if (existing) {
         return res.status(400).json({ error: 'Product already exists' });
       }
@@ -42,7 +46,7 @@ module.exports = async (req, res) => {
         name: name.trim(),
         price: parseFloat(price),
         type,
-        imageUrl: imageUrl || null,
+        imageUrl: imageUrl || '', // NEW: Store image URL
         createdAt: new Date()
       });
 
@@ -52,7 +56,7 @@ module.exports = async (req, res) => {
       });
     }
 
-    // PUT: Update product
+    // PUT: Update product (with image URL)
     if (req.method === 'PUT') {
       const { id, name, price, type, imageUrl } = req.body;
       
@@ -67,7 +71,7 @@ module.exports = async (req, res) => {
             name: name.trim(),
             price: parseFloat(price),
             type,
-            imageUrl: imageUrl || null,
+            imageUrl: imageUrl || '', // NEW: Update image URL
             updatedAt: new Date()
           } 
         }
