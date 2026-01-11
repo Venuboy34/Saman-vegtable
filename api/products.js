@@ -53,31 +53,53 @@ module.exports = async (req, res) => {
       });
     }
 
-    // PUT: Update product
+    // PUT: Update product (flexible - can update any field)
     if (req.method === 'PUT') {
       const { id, name, price, type } = req.body;
       
-      if (!id || !name || !price || !type) {
-        return res.status(400).json({ error: 'Missing required fields' });
+      if (!id) {
+        return res.status(400).json({ error: 'Product ID is required' });
       }
+
+      // Build update object dynamically based on what fields are provided
+      const updateFields = {};
+      
+      if (name !== undefined && name !== null && name.trim() !== '') {
+        updateFields.name = name.trim();
+      }
+      
+      if (price !== undefined && price !== null) {
+        updateFields.price = parseFloat(price);
+      }
+      
+      if (type !== undefined && type !== null) {
+        if (!['weight', 'piece'].includes(type)) {
+          return res.status(400).json({ error: 'Type must be "weight" or "piece"' });
+        }
+        updateFields.type = type;
+      }
+
+      // Check if there's anything to update
+      if (Object.keys(updateFields).length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+      }
+
+      // Add updatedAt timestamp
+      updateFields.updatedAt = new Date();
 
       const result = await products.updateOne(
         { _id: new ObjectId(id) },
-        { 
-          $set: { 
-            name: name.trim(),
-            price: parseFloat(price),
-            type,
-            updatedAt: new Date()
-          } 
-        }
+        { $set: updateFields }
       );
 
       if (result.matchedCount === 0) {
         return res.status(404).json({ error: 'Product not found' });
       }
 
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ 
+        success: true,
+        updated: updateFields 
+      });
     }
 
     // DELETE: Remove product
